@@ -7,7 +7,7 @@ on:
   workflow_dispatch:          # Actions 탭에서 수동 실행
   push:
     branches: [main]
-    paths: ["index.html", "*.py", ".github/workflows/**"]
+    paths: ["index.html", "*.py", "assets/**", ".github/workflows/**"]
 
 permissions:
   contents: write
@@ -46,9 +46,10 @@ jobs:
 
       - name: 배포 파일 준비
         run: |
-          mkdir -p _site/data
+          mkdir -p _site/data _site/assets
           cp index.html _site/
           cp data/data.js _site/data/
+          cp assets/*.png _site/assets/
 
       - uses: actions/upload-pages-artifact@v3
         with:

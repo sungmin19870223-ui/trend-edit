@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..800&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+KR:wght@600&display=swap">
+<style>
+/* 공유 썸네일(OG) 원본: 1200×630 으로 캡처해서 og.png 로 저장 */
+html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+body { background: #0f1013; color: #f1efe9; font-family: "IBM Plex Mono", monospace; position: relative; }
+.frame { position: absolute; inset: 28px; border: 1px solid rgba(241,239,233,.22); }
+.top, .bottom { position: absolute; left: 64px; right: 64px; display: flex; justify-content: space-between; font-size: 15px; letter-spacing: .28em; text-transform: uppercase; color: rgba(241,239,233,.62); }
+.top { top: 56px; }
+.bottom { bottom: 56px; align-items: flex-end; }
+.issue b { color: #8b97ff; font-weight: 500; }
+.title { position: absolute; left: 56px; top: 118px; font-family: "Bodoni Moda", serif; font-size: 212px; line-height: .82; letter-spacing: -.035em; font-variation-settings: "opsz" 96; }
+.title .i { font-style: italic; font-weight: 700; }
+.title .r { font-weight: 500; }
+.title .accent { color: #8b97ff; font-style: italic; font-weight: 700; }
+.ko { position: absolute; left: 66px; top: 470px; font-family: "Noto Serif KR", serif; font-size: 30px; letter-spacing: -.02em; color: #f1efe9; }
+.cats { display: flex; gap: 22px; }
+.cats span + span::before { content: "·"; margin-right: 22px; color: rgba(241,239,233,.35); }
+.stamp { position: absolute; right: 96px; top: 318px; width: 170px; height: 170px; border-radius: 50%; border: 1px solid #8b97ff; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8b97ff; text-align: center; transform: rotate(-12deg); }
+.stamp .n { font-family: "Bodoni Moda", serif; font-style: italic; font-weight: 700; font-size: 64px; line-height: 1; letter-spacing: -.02em; }
+.stamp .t { font-size: 12px; letter-spacing: .22em; margin-top: 6px; }
+</style>
+</head>
+<body>
+  <div class="frame"></div>
+  <div class="top"><span>Global Culture Intelligence</span><span class="issue">Updated every <b>3</b> hours</span></div>
+  <div class="title"><span class="i">The</span> <span class="r">Trend</span><br><span class="accent">Edit</span><span class="r">.</span></div>
+  <div class="stamp"><div class="n">28</div><div class="t">GLOBAL<br>SOURCES</div></div>
+  <div class="ko">오늘 세계가 입고, 쓰고, 이야기하는 것들</div>
+  <div class="bottom"><div class="cats"><span>Fashion</span><span>Design</span><span>Culture</span><span>Tech</span><span>Watches</span><span>Travel</span></div><span>KR · US · JP · EU</span></div>
+</body>
+</html>
