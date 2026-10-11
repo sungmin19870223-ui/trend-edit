@@ -4,32 +4,62 @@
 <meta charset="utf-8">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..800&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+KR:wght@600&display=swap">
 <style>
-/* 공유 썸네일(OG) 원본: 1200×630 으로 캡처해서 og.png 로 저장 */
+/* 공유 썸네일(OG) 원본: 1200×630 으로 캡처해서 og.png 로 저장.
+   ../data/data.js 를 읽어 그 시점의 TOP 3 이슈·날짜·수집 매체 수를 채운다. (수집할 때마다 재생성) */
 html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
 body { background: #0f1013; color: #f1efe9; font-family: "IBM Plex Mono", monospace; position: relative; }
 .frame { position: absolute; inset: 28px; border: 1px solid rgba(241,239,233,.22); }
-.top, .bottom { position: absolute; left: 64px; right: 64px; display: flex; justify-content: space-between; font-size: 15px; letter-spacing: .28em; text-transform: uppercase; color: rgba(241,239,233,.62); }
-.top { top: 56px; }
-.bottom { bottom: 56px; align-items: flex-end; }
-.issue b { color: #8b97ff; font-weight: 500; }
-.title { position: absolute; left: 56px; top: 118px; font-family: "Bodoni Moda", serif; font-size: 212px; line-height: .82; letter-spacing: -.035em; font-variation-settings: "opsz" 96; }
+.top { position: absolute; left: 64px; right: 64px; top: 56px; display: flex; justify-content: space-between; font-size: 15px; letter-spacing: .28em; text-transform: uppercase; color: rgba(241,239,233,.62); }
+.top b { color: #8b97ff; font-weight: 500; }
+.title { position: absolute; left: 56px; top: 116px; font-family: "Bodoni Moda", serif; font-size: 150px; line-height: .86; letter-spacing: -.035em; font-variation-settings: "opsz" 96; }
 .title .i { font-style: italic; font-weight: 700; }
 .title .r { font-weight: 500; }
 .title .accent { color: #8b97ff; font-style: italic; font-weight: 700; }
-.ko { position: absolute; left: 66px; top: 470px; font-family: "Noto Serif KR", serif; font-size: 30px; letter-spacing: -.02em; color: #f1efe9; }
-.cats { display: flex; gap: 22px; }
-.cats span + span::before { content: "·"; margin-right: 22px; color: rgba(241,239,233,.35); }
-.stamp { position: absolute; right: 96px; top: 318px; width: 170px; height: 170px; border-radius: 50%; border: 1px solid #8b97ff; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8b97ff; text-align: center; transform: rotate(-12deg); }
-.stamp .n { font-family: "Bodoni Moda", serif; font-style: italic; font-weight: 700; font-size: 64px; line-height: 1; letter-spacing: -.02em; }
-.stamp .t { font-size: 12px; letter-spacing: .22em; margin-top: 6px; }
+.ko { position: absolute; right: 64px; width: 380px; top: 444px; font-family: "Noto Serif KR", serif; font-size: 22px; line-height: 1.5; letter-spacing: -.02em; color: rgba(241,239,233,.88); }
+/* 지금 뜨는 이슈 */
+.now { position: absolute; right: 64px; top: 128px; width: 380px; }
+.now .label { font-size: 13px; letter-spacing: .28em; color: #8b97ff; text-transform: uppercase; border-bottom: 1px solid rgba(139,151,255,.5); padding-bottom: 10px; display: flex; justify-content: space-between; }
+.now ol { list-style: none; margin: 0; padding: 0; counter-reset: n; }
+.now li { display: grid; grid-template-columns: 44px 1fr; align-items: baseline; padding: 14px 0; border-bottom: 1px solid rgba(241,239,233,.16); }
+.now li::before { counter-increment: n; content: counter(n, decimal-leading-zero); font-size: 14px; color: rgba(241,239,233,.5); }
+.now li span { font-family: "Bodoni Moda", serif; font-style: italic; font-weight: 600; font-size: 34px; line-height: 1.05; letter-spacing: -.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.now li small { grid-column: 2; font-size: 12px; letter-spacing: .14em; color: rgba(241,239,233,.5); margin-top: 4px; text-transform: uppercase; }
+.bottom { position: absolute; left: 64px; right: 64px; bottom: 56px; display: flex; justify-content: space-between; font-size: 14px; letter-spacing: .26em; text-transform: uppercase; color: rgba(241,239,233,.62); }
+.cats span + span::before { content: "·"; margin: 0 16px; color: rgba(241,239,233,.35); }
 </style>
 </head>
 <body>
   <div class="frame"></div>
-  <div class="top"><span>Global Culture Intelligence</span><span class="issue">Updated every <b>3</b> hours</span></div>
-  <div class="title"><span class="i">The</span> <span class="r">Trend</span><br><span class="accent">Edit</span><span class="r">.</span></div>
-  <div class="stamp"><div class="n">28</div><div class="t">GLOBAL<br>SOURCES</div></div>
+  <div class="top"><span id="date">Global Culture Intelligence</span><span>Updated every <b>3</b> hours</span></div>
+  <div class="title"><span class="i">The</span><br><span class="r">Trend</span><br><span class="accent">Edit</span><span class="r">.</span></div>
+  <div class="now"><div class="label"><span>Now Trending</span><span id="win">7 Days</span></div><ol id="top"></ol></div>
   <div class="ko">오늘 세계가 입고, 쓰고, 이야기하는 것들</div>
-  <div class="bottom"><div class="cats"><span>Fashion</span><span>Design</span><span>Culture</span><span>Tech</span><span>Watches</span><span>Travel</span></div><span>KR · US · JP · EU</span></div>
+  <div class="bottom"><div class="cats"><span>Fashion</span><span>Design</span><span>Culture</span><span>Tech</span><span>Travel</span></div><span id="src">KR · US · JP · EU</span></div>
+<script src="../data/data.js"></script>
+<script>
+(function () {
+  var D = window.TREND_DATA;
+  var list = document.getElementById("top");
+  var KIND = { brand: "Brand", issue: "Issue", topic: "Category" };
+  var rows = D && D.trends && D.trends.week ? D.trends.week.slice(0, 3) : [];
+  if (!rows.length) {
+    // 데이터가 없을 때의 기본 문구
+    rows = [{ name: "Fashion", kind: "topic", sources: 0 }, { name: "Design", kind: "topic", sources: 0 }, { name: "Culture", kind: "topic", sources: 0 }];
+  }
+  rows.forEach(function (r) {
+    var li = document.createElement("li");
+    var s = document.createElement("span"); s.textContent = r.name;
+    var m = document.createElement("small"); m.textContent = (KIND[r.kind] || "") + (r.sources ? " · " + r.sources + " sources" : "");
+    li.appendChild(s); li.appendChild(m); list.appendChild(li);
+  });
+  if (D) {
+    var d = new Date(D.generated_at);
+    var fmt = d.toLocaleDateString("en-GB", { timeZone: "Asia/Seoul", day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
+    document.getElementById("date").textContent = "Edition · " + fmt;
+    var live = D.sources.filter(function (s) { return s.status && s.status.ok; }).length;
+    document.getElementById("src").textContent = live + " sources · KR · US · JP · EU";
+  }
+})();
+</script>
 </body>
 </html>

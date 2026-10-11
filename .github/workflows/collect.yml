@@ -51,6 +51,15 @@ jobs:
           cp data/data.js _site/data/
           cp assets/*.png _site/assets/
 
+      - name: 공유 썸네일 생성 (그 시점 TOP 3 이슈 반영)
+        run: |
+          google-chrome --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
+            --allow-file-access-from-files --force-device-scale-factor=1 \
+            --window-size=1200,630 --virtual-time-budget=10000 \
+            --screenshot="$PWD/_site/assets/og.png" "file://$PWD/assets/og.html" || echo "썸네일 생성 실패 - 기본 이미지 사용"
+          # 카카오톡 등이 예전 이미지를 계속 보여 주지 않도록 주소에 버전 번호를 붙임
+          sed -i "s#assets/og.png#assets/og.png?v=${GITHUB_RUN_ID}#g" _site/index.html
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

@@ -60,10 +60,19 @@ NS = {
 # ─────────────────────────────────────────────────────────────
 # 1. 수집
 # ─────────────────────────────────────────────────────────────
-def fetch(url, timeout=25):
+def fetch(url, timeout=40, retries=2):
+    """해외 서버(GitHub Actions)에서 국내 매체는 응답이 느릴 수 있어 대기 시간을 넉넉히 두고 1회 재시도."""
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/rss+xml, application/xml, text/xml, */*"})
-    with urllib.request.urlopen(req, timeout=timeout) as res:
-        return res.read()
+    for attempt in range(retries):
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as res:
+                return res.read()
+        except urllib.error.HTTPError:
+            raise  # 403 등 차단은 재시도해도 같으므로 바로 실패 처리
+        except Exception:
+            if attempt == retries - 1:
+                raise
+            time.sleep(3)
 
 
 def strip_html(text):
