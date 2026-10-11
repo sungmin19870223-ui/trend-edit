@@ -1,0 +1,58 @@
+# 3시간마다 RSS 수집 → 데이터 커밋 → GitHub Pages 배포
+name: collect-and-deploy
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"   # UTC 기준 3시간마다 (정각 혼잡 피해서 17분)
+  workflow_dispatch:          # Actions 탭에서 수동 실행
+  push:
+    branches: [main]
+    paths: ["index.html", "*.py", ".github/workflows/**"]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: RSS 수집·분석
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # 없으면 AI 요약만 건너뜀
+        run: python collect.py
+
+      - name: 누적 데이터 커밋
+        run: |
+          git config user.name "trend-edit-bot"
+          git config user.email "trend-edit-bot@users.noreply.github.com"
+          git add data/store.json data/data.js
+          git diff --cached --quiet || git commit -m "data: $(date -u +'%Y-%m-%d %H:%M') UTC 수집"
+          git push
+
+      - name: 배포 파일 준비
+        run: |
+          mkdir -p _site/data
+          cp index.html _site/
+          cp data/data.js _site/data/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
