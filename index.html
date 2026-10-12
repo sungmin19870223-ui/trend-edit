@@ -69,7 +69,9 @@ button, input { font: inherit; color: inherit; }
 .menu a:hover { color: var(--ink); }
 .menu a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--ink); }
 .search-toggle { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; display: grid; place-items: center; background: none; border: 0; cursor: pointer; }
-.search-toggle svg { width: 20px; height: 20px; }
+.search-toggle svg, .search-toggle-m svg { width: 20px; height: 20px; }
+.util-r { display: flex; align-items: center; gap: 8px; }
+.util .search-toggle-m { display: none; width: 44px; height: 44px; place-items: center; padding: 0; color: var(--ink); }
 .search-bar { border-top: 1px solid var(--rule); padding-block: 14px; }
 .search-form { display: flex; gap: 8px; max-width: 640px; margin: 0 auto; }
 .search-form input { flex: 1; min-width: 0; height: 46px; border: 1px solid var(--ink); background: #fff; padding: 0 14px; font-size: 16px; border-radius: 0; }
@@ -202,14 +204,17 @@ footer nav a:hover { text-decoration: underline; text-underline-offset: 3px; }
   .feature-list .story { grid-template-columns: minmax(0, 1fr) 104px; }
   .util .upd { display: none; }
 }
-@media (max-width: 360px) {
-  .menu { gap: 0 10px; }
+@media (max-width: 380px) {
+  .menu { gap: 0 9px; }
   .menu a { font-size: 14px; }
 }
 @media (max-width: 600px) {
   .grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
   .nav-row { justify-content: flex-start; }
-  .menu { padding: 0 40px 0 0; justify-content: flex-start; gap: 0 14px; flex-wrap: nowrap; }
+  .search-toggle { display: none; }
+  .util .search-toggle-m { display: grid; margin-right: -12px; }
+  .menu { min-width: 0; width: 100%; padding: 0; justify-content: space-between; gap: 0 10px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .menu::-webkit-scrollbar { display: none; }
   .util { justify-content: flex-end; }
   .menu a { font-size: 15px; white-space: nowrap; }
   .reader-actions .btn { flex: 1 1 100%; }
@@ -226,7 +231,12 @@ footer nav a:hover { text-decoration: underline; text-underline-offset: 3px; }
 <header>
   <div class="wrap util">
     <span class="upd" id="updated"></span>
-    <a href="#/saved" id="savedLink">저장한 기사</a>
+    <span class="util-r">
+      <a href="#/saved" id="savedLink">저장한 기사</a>
+      <button class="search-toggle-m" type="button" data-search-toggle aria-expanded="false" aria-controls="searchBar" aria-label="검색 열기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+    </span>
   </div>
   <div class="wrap brand">
     <a class="logo" href="#/" aria-label="The Trend Edit 홈">The Trend Edit</a>
@@ -235,7 +245,7 @@ footer nav a:hover { text-decoration: underline; text-underline-offset: 3px; }
   <nav class="nav" aria-label="분야 메뉴">
     <div class="wrap nav-row">
       <ul class="menu" id="menu"></ul>
-      <button class="search-toggle" id="searchToggle" type="button" aria-expanded="false" aria-controls="searchBar" aria-label="검색 열기">
+      <button class="search-toggle" id="searchToggle" type="button" data-search-toggle aria-expanded="false" aria-controls="searchBar" aria-label="검색 열기">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       </button>
     </div>
@@ -697,11 +707,13 @@ document.addEventListener("click", e => {
     t.setAttribute("aria-pressed", String(!!bookmarks[id]));
     t.textContent = bookmarks[id] ? "저장됨" : "저장";
     $("#savedLink").textContent = Object.keys(bookmarks).length ? `저장한 기사 (${Object.keys(bookmarks).length})` : "저장한 기사";
-  } else if (t.id === "searchToggle") {
+  } else if ("searchToggle" in t.dataset) {
     const open = $("#searchBar").hidden;
     $("#searchBar").hidden = !open;
-    t.setAttribute("aria-expanded", String(open));
-    t.setAttribute("aria-label", open ? "검색 닫기" : "검색 열기");
+    document.querySelectorAll("[data-search-toggle]").forEach(b => {
+      b.setAttribute("aria-expanded", String(open));
+      b.setAttribute("aria-label", open ? "검색 닫기" : "검색 열기");
+    });
     if (open) $("#q").focus();
   }
 });
