@@ -37,6 +37,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 STORE_PATH = os.path.join(DATA_DIR, "store.json")
 OUTPUT_JS = os.path.join(DATA_DIR, "data.js")
+# 사람이 검수했거나 별도로 일괄 번역한 한국어 제목·요약 (기사 id → {title_ko, summary_ko, by})
+TRANSLATIONS_PATH = os.path.join(DATA_DIR, "translations.json")
+COLLECT_SCHEDULE = "3시간 간격 예약 실행 (GitHub Actions)"
 
 RETENTION_DAYS = 90          # 아카이브 보관 기간
 SNIPPET_LEN = 220            # 미리보기 문구 최대 길이 (전문 복제 방지)
@@ -483,10 +486,16 @@ def ai_summarize(articles, source_map):
         batch = todo[i:i + 10]
         payload = [{"id": a["id"], "source": source_map[a["source"]]["name"], "title": a["title"], "preview": a["snippet"]} for a in batch]
         prompt = (
-            "다음은 해외 패션·라이프스타일 매체 RSS의 제목과 미리보기 문구다. 각 항목에 대해 아래 JSON 배열만 출력하라.\n"
-            '[{"id": "...", "title_ko": "자연스러운 한국어 제목", "summary_ko": "미리보기에 있는 사실만으로 1~2문장 요약", '
+            "다음은 해외 패션·라이프스타일 매체 RSS의 제목과 미리보기 문구(영어 또는 일본어)다. "
+            "한국 패션 매거진 독자를 위해 각 항목을 한국어로 옮기고, 아래 JSON 배열만 출력하라.\n"
+            '[{"id": "...", "title_ko": "패션 매거진 톤의 자연스러운 한국어 제목", '
+            '"summary_ko": "제목과 미리보기에 있는 사실만으로 쓴 1~2문장 한국어 요약", '
             '"keywords": ["핵심 키워드 2~4개 (브랜드·인물·이슈명은 원어 표기 유지)"]}]\n'
-            "규칙: 미리보기에 없는 사실을 추측하거나 덧붙이지 말 것. 정보가 부족하면 summary_ko 를 짧게 쓸 것.\n\n"
+            "규칙:\n"
+            "- 원문에 없는 사실·평가·유행 여부를 추측하거나 덧붙이지 말 것.\n"
+            "- 미리보기가 비었거나 제목 반복뿐이면 summary_ko 는 빈 문자열로 둘 것. 'The post ... appeared first on' 같은 문구는 무시.\n"
+            "- 브랜드명·인명은 통용되는 한글 표기를 쓰고(예: 발렌티노, 미우치아 프라다), 표기가 불확실하면 '한글(원어)' 형태로 쓰거나 원어를 유지.\n"
+            "- 매체명(Vogue, GQ 등)은 원어 그대로 둔다.\n\n"
             + json.dumps(payload, ensure_ascii=False)
         )
         try:
@@ -544,6 +553,25 @@ def save_store(store):
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(serial, f, ensure_ascii=False)
     os.replace(tmp, STORE_PATH)
+
+
+def load_translations():
+    if not os.path.exists(TRANSLATIONS_PATH):
+        return {}
+    with open(TRANSLATIONS_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def apply_translations(articles, translations):
+    """AI 요약이 아직 없는 기사에 translations.json 의 한국어 제목·요약을 채운다."""
+    n = 0
+    for a in articles:
+        tr = translations.get(a["id"])
+        if tr and not a.get("ai"):
+            a["ai"] = {"title_ko": tr.get("title_ko", ""), "summary_ko": tr.get("summary_ko", ""),
+                       "keywords": [], "model": tr.get("by", "translations.json")}
+            n += 1
+    return n
 
 
 def compact(a):
@@ -608,6 +636,9 @@ def main():
         a["tags"], a["brands"] = classify(a)
     assign_clusters(articles)
 
+    n_tr = apply_translations(articles, load_translations())
+    if n_tr:
+        print(f"  translations.json 번역 적용 {n_tr}건")
     if use_ai:
         print("[4/5] AI 한국어 요약")
         n = ai_summarize(articles, source_map)
@@ -634,6 +665,7 @@ def main():
         "first_run": store.get("first_run"),
         "history_days": history_days,
         "ai_enabled": use_ai,
+        "collect_schedule": COLLECT_SCHEDULE,
         "retention_days": RETENTION_DAYS,
         "tags": [{"id": t[0], "label": t[1]} for t in TAGS],
         "sources": [{**{k: s[k] for k in ("id", "name", "section", "region", "lang", "site")},
