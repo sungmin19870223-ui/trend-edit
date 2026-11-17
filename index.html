@@ -112,6 +112,14 @@ button, input { font: inherit; color: inherit; }
 .sec-head a.more-link { font-size: 14px; font-weight: 600; white-space: nowrap; padding: 8px 0; }
 .sec-head a.more-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 44px 32px; }
+.grid.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
+.chips a { display: inline-block; padding: 8px 14px; border: 1px solid var(--rule); border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--ink-2); }
+.chips a span { color: var(--ink-3); font-weight: 400; margin-left: 2px; }
+.chips a:hover { border-color: var(--ink); color: var(--ink); }
+.chips a[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.chips a[aria-current="page"] span { color: inherit; opacity: .75; }
+.kw-note { margin: 16px 0 0; font-size: 13px; color: var(--ink-3); }
 .grid .hl { font-size: 19px; line-height: 1.45; }
 .grid .dek { font-size: 15.5px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
@@ -188,7 +196,7 @@ footer nav a { display: inline-block; font-weight: 600; color: var(--ink); paddi
 footer nav a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 @media (max-width: 1024px) {
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid, .grid.grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hero { grid-template-columns: minmax(0, 1fr); }
   .hero-side { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
   .hero-side .story + .story { padding-top: 0; border-top: 0; }
@@ -209,7 +217,7 @@ footer nav a:hover { text-decoration: underline; text-underline-offset: 3px; }
   .menu a { font-size: 14px; }
 }
 @media (max-width: 600px) {
-  .grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .grid, .grid.grid-4 { grid-template-columns: minmax(0, 1fr); gap: 40px; }
   .nav-row { justify-content: flex-start; }
   .search-toggle { display: none; }
   .util .search-toggle-m { display: grid; margin-right: -12px; }
@@ -240,7 +248,7 @@ footer nav a:hover { text-decoration: underline; text-underline-offset: 3px; }
   </div>
   <div class="wrap brand">
     <a class="logo" href="#/" aria-label="The Trend Edit 홈">The Trend Edit</a>
-    <p class="tagline">국내외 패션과 트렌드를 한눈에</p>
+    <p class="tagline">국내외 패션·매거진·문화·시사를 한눈에</p>
   </div>
   <nav class="nav" aria-label="분야 메뉴">
     <div class="wrap nav-row">
@@ -264,7 +272,7 @@ footer nav a:hover { text-decoration: underline; text-underline-offset: 3px; }
 <footer>
   <div class="wrap">
     <span class="logo">The Trend Edit</span>
-    <p>국내외 패션·라이프스타일 매체가 공개한 RSS에서 제목·발행일·대표 이미지·짧은 미리보기만 모아 한국어로 소개합니다. 기사 전문은 싣지 않으며, 모든 기사는 원문 매체로 연결됩니다.</p>
+    <p>국내외 패션 매거진, 국내 일간지 문화면·시사 주간지, 라이프스타일 매체가 공개한 RSS에서 제목·발행일·대표 이미지·짧은 미리보기만 모아 한국어로 소개합니다. 기사 전문은 싣지 않으며, 모든 기사는 원문 매체로 연결됩니다.</p>
     <p>해외 기사의 한국어 제목과 요약은 RSS 미리보기를 바탕으로 AI가 번역·요약한 것으로, 원문과 다를 수 있습니다. 이미지는 각 매체 서버에서 직접 불러옵니다.</p>
     <p id="schedule"></p>
     <nav aria-label="사이트 정보">
@@ -291,10 +299,13 @@ const CATS = [
   { id: "global", label: "해외 패션", section: "global_fashion", desc: "Vogue·GQ·Hypebeast 등 해외 패션 매체의 새 소식을 한국어로 전합니다." },
   { id: "korea", label: "국내 패션", section: "korea_fashion", desc: "보그 코리아·엘르 코리아·하퍼스 바자 코리아 등 국내 매체의 새 기사입니다." },
   { id: "trend", label: "트렌드", tags: ["runway", "collab", "popup", "celebrity", "beauty", "street", "sneakers"], desc: "컬렉션·패션위크, 협업, 팝업, 셀럽 스타일, 뷰티, 스트리트, 운동화 관련 기사를 모았습니다. 제목과 미리보기의 키워드로 자동 분류합니다." },
-  { id: "life", label: "라이프스타일", section: "lifestyle", desc: "디자인·인테리어, 시계, 여행, 미식 등 패션 밖의 취향을 다루는 매체의 기사입니다." },
+  { id: "culture", label: "문화", section: "korea_culture", desc: "연합뉴스·동아일보·조선일보·경향신문·매일경제 문화면과 문화뉴스·아이즈의 영화·음악·공연·전시·방송 소식입니다. 최근 14일치를 보관합니다." },
+  { id: "current", label: "시사", section: "korea_current", desc: "시사저널·주간경향·미디어오늘의 정치·사회·미디어 기사입니다. 최근 14일치를 보관합니다." },
+  { id: "life", label: "라이프스타일", section: "lifestyle", desc: "디에디트·월간 디자인·트래블바이크뉴스와 해외 매체의 디자인·인테리어, 시계, 여행, 미식 기사입니다." },
 ];
 const CAT = Object.fromEntries(CATS.map(c => [c.id, c]));
-const SECTION_LABEL = { global_fashion: "해외 패션", korea_fashion: "국내 패션", lifestyle: "라이프스타일" };
+const SECTION_LABEL = { global_fashion: "해외 패션", korea_fashion: "국내 패션·매거진", lifestyle: "라이프스타일", korea_culture: "국내 문화", korea_current: "국내 시사" };
+const SECTION_ORDER = ["global_fashion", "korea_fashion", "korea_culture", "korea_current", "lifestyle"];
 const LANG_LABEL = { en: "영어", ja: "일본어", ko: "한국어" };
 const PAGE = 24;
 
@@ -437,6 +448,66 @@ const readable = a => isKo(a) || translated(a);
 // '최근'은 사이트 업데이트 시각 기준 (수집이 멈춰도 화면이 비지 않도록)
 const recent = (a, hours) => new Date(D.generated_at) - new Date(a.d) <= hours * 3600e3;
 
+// ─────────────────────────────────────────────
+// 시즌 에디트: 한국 시간 기준 '이번 달'에 맞는 시즌 키워드로 기사를 모은다.
+//  - 계절이 바뀌는 달(2·5·8·11월)에는 다음 계절 키워드도 함께 본다.
+//  - 제목·미리보기·한국어 요약에 키워드가 있는 기사만 고른다(최근 30일).
+// ─────────────────────────────────────────────
+const SEASONS = {
+  spring: { name: "봄", months: [3, 4, 5], groups: [
+    { id: "spring-style", label: "봄 스타일", kw: ["봄옷", "봄 코디", "봄 신상", "트렌치", "가디건", "spring 20", "spring/summer", "SS27", "S/S"] },
+    { id: "spring-out", label: "꽃·봄나들이", kw: ["벚꽃", "꽃놀이", "봄나들이", "봄 여행", "피크닉", "cherry blossom"] },
+    { id: "spring-beauty", label: "봄 뷰티", kw: ["선크림", "자외선", "봄 메이크업", "미세먼지", "sunscreen"] },
+  ] },
+  summer: { name: "여름", months: [6, 7, 8], groups: [
+    { id: "summer-style", label: "여름 스타일", kw: ["여름", "썸머", "린넨", "수영복", "샌들", "summer", "swimwear", "linen"] },
+    { id: "summer-trip", label: "휴가·바캉스", kw: ["휴가", "바캉스", "호캉스", "여름 여행", "해변", "vacation", "beach"] },
+    { id: "summer-fest", label: "페스티벌", kw: ["페스티벌", "록페", "워터밤", "festival"] },
+  ] },
+  autumn: { name: "가을", months: [9, 10, 11], groups: [
+    { id: "fall-style", label: "가을 스타일", kw: ["가을 패션", "가을 코디", "가을 아우터", "가을 룩", "트렌치", "가디건", "레이어드", "스웨이드", "fall 2026", "autumn/winter", "fall/winter", "FW26", "AW26", "F/W"] },
+    { id: "fall-trip", label: "단풍·가을 여행", kw: ["단풍", "억새", "가을 여행", "foliage"] },
+    { id: "fall-art", label: "전시·영화제·공연", kw: ["전시", "비엔날레", "아트페어", "영화제", "공연", "뮤지컬", "biennale", "art fair", "film festival"] },
+  ] },
+  winter: { name: "겨울", months: [12, 1, 2], groups: [
+    { id: "holiday", label: "연말·홀리데이", kw: ["연말", "크리스마스", "홀리데이", "송년", "선물", "기프트", "새해", "신년", "holiday", "christmas", "gift guide", "new year"] },
+    { id: "winter-style", label: "겨울 아우터·니트", kw: ["패딩", "롱코트", "울 코트", "코트 스타일링", "무스탕", "퍼 트리밍", "페이크 퍼", "구스다운", "니트웨어", "머플러", "겨울 아우터", "겨울 패션", "겨울 코디", "puffer", "shearling", "outerwear", "winter coat", "winter fashion"] },
+    { id: "winter-leisure", label: "겨울 여행·레저", kw: ["스키", "스노보드", "온천", "눈꽃", "겨울 여행", "ski resort", "snowboard"] },
+  ] },
+};
+// 달마다 돌아오는 국내 시즌 이벤트 (날짜는 해마다 달라 키워드로만 찾는다)
+const MONTH_EVENTS = {
+  1: ["새해", "신년", "설날", "설 연휴", "겨울 세일"], 2: ["설날", "설 연휴", "발렌타인", "밸런타인", "졸업"],
+  3: ["입학", "신학기", "화이트데이"], 4: ["벚꽃", "꽃축제", "식목일"], 5: ["어린이날", "어버이날", "가정의 달", "스승의 날", "웨딩"],
+  6: ["장마", "현충일", "썸머 세일"], 7: ["휴가", "바캉스", "초복", "여름 세일"], 8: ["광복절", "말복", "여름 휴가"],
+  9: ["추석", "한가위", "명절"], 10: ["핼러윈", "할로윈", "부산국제영화제", "BIFF", "가을 축제", "halloween"],
+  11: ["블랙프라이데이", "블프", "빼빼로", "수능", "김장", "보졸레", "black friday"],
+  12: ["크리스마스", "시상식", "연기대상", "연예대상", "가요대전", "가요대제전", "MAMA", "송년", "연말 결산"],
+};
+function seasonInfo() {
+  const now = new Date(D.generated_at);
+  const m = Number(now.toLocaleString("en-US", { timeZone: "Asia/Seoul", month: "numeric" }));
+  const y = Number(now.toLocaleString("en-US", { timeZone: "Asia/Seoul", year: "numeric" }));
+  const keys = ["winter", "spring", "summer", "autumn"];
+  const curKey = keys.find(k => SEASONS[k].months.includes(m));
+  const cur = SEASONS[curKey];
+  const last = cur.months[2] === m;
+  const next = last ? SEASONS[keys[(keys.indexOf(curKey) + 1) % 4]] : null;
+  const nm = m % 12 + 1;
+  const groups = [
+    { id: "events", label: `${m}월 시즌 이벤트`, kw: MONTH_EVENTS[m].concat(last ? MONTH_EVENTS[nm].slice(0, 3) : []) },
+    { id: "issue", label: `${nm}월호·화보`, kw: [`${m}월호`, `${nm}월호`, "화보", "커버 스토리", "커버를", "디지털 커버", "cover star"] },
+    ...cur.groups,
+    ...(next ? next.groups.slice(0, 2).map(g => ({ ...g, label: `${g.label} (다가오는 ${next.name})` })) : []),
+  ];
+  const title = next ? `${y} 늦${cur.name} → ${next.name}` : `${y} ${cur.name}`;
+  return { m, title, groups };
+}
+const SEASON = D ? seasonInfo() : { m: 0, title: "", groups: [] };
+const hayOf = a => [a.t, a.x, a.ai?.t, a.ai?.s, ...(a.ai?.k || [])].join(" ").toLowerCase();
+const seasonHit = (a, g) => { const h = hayOf(a); return g.kw.some(k => h.includes(k.toLowerCase())); };
+const inSeason = a => recent(a, 24 * 30) && SEASON.groups.some(g => seasonHit(a, g));
+
 function imgKey(a) {
   if (!a.img) return "";
   try { const f = decodeURIComponent(a.img).split("?")[0].split("/").pop(); return f.length > 12 ? "i:" + f.toLowerCase() : ""; } catch { return ""; }
@@ -471,7 +542,7 @@ function renderHome() {
   // 메인 기사: 최근 48시간 안에 나온, 사진과 한국어 제목이 있는 패션 기사 중 가장 최근 것
   const windowed = all.filter(a => recent(a, 48)).length ? all.filter(a => recent(a, 48)) : all;
   const [lead] = pick(windowed, 1, used, { need: a => a.img && readable(a) && fashion(a) }).concat(pick(all, 1, used, { need: a => readable(a) }));
-  const side = pick(all.filter(a => recent(a, 96)), 3, used, { perSource: 1, need: a => a.img && readable(a) && a.s !== lead?.s });
+  const side = pick(all.filter(a => recent(a, 96)), 3, used, { perSource: 1, need: a => a.img && readable(a) && a.s !== lead?.s && srcMap[a.s].section !== "korea_current" });
   const latest = pickPreferImg(all.filter(a => recent(a, 72)), 9, used, { perSource: 2, need: readable });
 
   let html = "";
@@ -485,6 +556,15 @@ function renderHome() {
     <div class="sec-head"><div><h2 id="latestHead">최신 기사</h2><p>방금 들어온 국내외 매체의 새 기사</p></div></div>
     <div class="grid">${latest.map(a => story(a)).join("")}</div>
   </section>`;
+
+  const seasonList = all.filter(inSeason);
+  if (seasonList.length) {
+    const picks = pickPreferImg(seasonList, 4, used, { perSource: 1, need: readable });
+    if (picks.length) html += `<section class="wrap section" aria-labelledby="h-season">
+      <div class="sec-head"><div><h2 id="h-season">${esc(SEASON.title)} 시즌 에디트</h2><p>${esc(SEASON.groups.slice(0, 4).map(g => g.label).join(" · "))}</p></div><a class="more-link" href="#/season">시즌 전체 보기 →</a></div>
+      <div class="grid grid-4">${picks.map(a => story(a, { w: 600 })).join("")}</div>
+    </section>`;
+  }
 
   for (const c of CATS) {
     const list = all.filter(a => inCat(a, c.id));
@@ -529,7 +609,7 @@ function listPage({ title, desc, list, emptyHtml, lead = true }) {
 }
 
 function renderSources() {
-  const groups = ["global_fashion", "korea_fashion", "lifestyle"].map(sec => {
+  const groups = SECTION_ORDER.map(sec => {
     const items = D.sources.filter(s => s.section === sec).map(s => {
       const st = !s.feed ? "공개 RSS가 없어 자동 수집하지 않습니다" : s.status?.ok ? "자동 수집 중" : `최근 수집 실패${s.status?.last_ok ? ` (마지막 성공 ${dateLong(s.status.last_ok)})` : ""}`;
       return `<li><a href="${esc(s.site)}" target="_blank" rel="noopener">${esc(s.name)}<span class="sr-only"> (새 탭에서 열림)</span></a><span>${esc(LANG_LABEL[s.lang] || "")} · ${esc(st)}</span></li>`;
@@ -547,6 +627,34 @@ function renderSources() {
     </div>`;
 }
 
+function renderSeason(r) {
+  const all = newest(ARTICLES.filter(a => recent(a, 24 * 30)));
+  const counted = SEASON.groups.map(g => ({ ...g, list: uniqueStories(all.filter(a => seasonHit(a, g))) })).filter(g => g.list.length);
+  const sel = counted.find(g => g.id === r.q);
+  const chips = `<ul class="chips" aria-label="시즌 키워드">
+    <li><a href="#/season" ${!sel ? 'aria-current="page"' : ""}>전체</a></li>
+    ${counted.map(g => `<li><a href="#/season?q=${esc(g.id)}" ${sel === g ? 'aria-current="page"' : ""}>${esc(g.label)} <span>${g.list.length}</span></a></li>`).join("")}
+  </ul>`;
+  const head = `<div class="wrap page-head"><h1>${esc(SEASON.title)} 시즌 에디트</h1>
+    <p>지금 계절과 ${SEASON.m}월에 맞는 키워드로 최근 30일 국내외 매거진·문화·시사 기사를 모았습니다. 제목·미리보기·요약에 키워드가 들어간 기사만 자동으로 고릅니다.</p>${chips}</div>`;
+  if (sel) {
+    const body = listPage({ title: "", desc: "", list: sel.list, emptyHtml: "", lead: true });
+    return head + `<div class="wrap"><p class="kw-note">찾는 키워드: ${esc(sel.kw.join(", "))}</p></div>` + body.slice(body.indexOf("</div>") + 6);
+  }
+  if (!counted.length) return head + `<div class="wrap empty"><p>이번 시즌 키워드에 맞는 기사가 아직 없습니다.</p></div>`;
+  const used = new Set();
+  return head + counted.map(g => {
+    const [flead] = pick(g.list, 1, used, { need: a => a.img && readable(a) }).concat(pick(g.list, 1, used));
+    if (!flead) return "";
+    const subs = pickPreferImg(g.list, 4, used, { perSource: 2, need: readable });
+    return `<section class="wrap section" aria-labelledby="h-${esc(g.id)}">
+      <div class="sec-head"><div><h2 id="h-${esc(g.id)}">${esc(g.label)}</h2><p>최근 30일 ${g.list.length}건</p></div><a class="more-link" href="#/season?q=${esc(g.id)}">모두 보기 →</a></div>
+      <div class="feature"><div class="feature-lead">${story(flead, { w: 1000 })}</div>
+      <div class="feature-list">${subs.map(a => story(a, { dek: false, w: 300 })).join("")}</div></div>
+    </section>`;
+  }).join("");
+}
+
 function scheduleText() {
   return `기사 수집은 약 3시간 간격으로 예약되어 있으며(GitHub Actions), 실행 대기 상황에 따라 실제 간격은 더 길어질 수 있습니다. 마지막 업데이트: ${dateLong(D.generated_at)} (한국 시간).`;
 }
@@ -559,7 +667,9 @@ function renderView(r) {
   const main = $("#main");
   let html, title = "The Trend Edit — 국내외 패션과 트렌드를 한눈에";
   if (r.view === "home") html = renderHome();
-  else if (CAT[r.view]) {
+  else if (r.view === "season") {
+    html = renderSeason(r); title = `${SEASON.title} 시즌 에디트 — The Trend Edit`;
+  } else if (CAT[r.view]) {
     const c = CAT[r.view];
     html = listPage({ title: esc(c.label), desc: esc(c.desc), list: uniqueStories(newest(ARTICLES.filter(a => inCat(a, c.id)))), emptyHtml: "<p>이 분야에 아직 수집된 기사가 없습니다.</p>" });
     title = `${c.label} — The Trend Edit`;
@@ -736,8 +846,8 @@ if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 // ─────────────────────────────────────────────
 // 시작
 // ─────────────────────────────────────────────
-$("#menu").innerHTML = [{ id: "home", label: "전체" }, ...CATS]
-  .filter(c => c.id === "home" || ARTICLES.some(a => inCat(a, c.id)))   // 기사가 없는 분류는 메뉴에서 숨김
+$("#menu").innerHTML = [{ id: "home", label: "전체" }, { id: "season", label: "시즌" }, ...CATS]
+  .filter(c => c.id === "home" || (c.id === "season" ? ARTICLES.some(inSeason) : ARTICLES.some(a => inCat(a, c.id))))   // 기사가 없는 분류는 메뉴에서 숨김
   .map(c => `<li><a href="${c.id === "home" ? "#/" : "#/" + c.id}" data-view="${c.id}">${esc(c.label)}</a></li>`).join("");
 
 if (!D || !ARTICLES.length) {

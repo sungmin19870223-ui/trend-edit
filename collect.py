@@ -41,7 +41,9 @@ OUTPUT_JS = os.path.join(DATA_DIR, "data.js")
 TRANSLATIONS_PATH = os.path.join(DATA_DIR, "translations.json")
 COLLECT_SCHEDULE = "3시간 간격 예약 실행 (GitHub Actions)"
 
-RETENTION_DAYS = 90          # 아카이브 보관 기간
+RETENTION_DAYS = 90          # 아카이브 보관 기간 (매체별 retention 이 있으면 그 값)
+# 트렌드 랭킹·브랜드·리포트 분석에 쓰는 섹션 (문화·시사 일간지가 패션 트렌드 지표를 덮지 않도록 분리)
+TREND_SECTIONS = {"global_fashion", "korea_fashion", "lifestyle"}
 SNIPPET_LEN = 220            # 미리보기 문구 최대 길이 (전문 복제 방지)
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) TrendEditReader/1.0 (personal RSS reader)"
 KST = timezone(timedelta(hours=9))
@@ -626,9 +628,14 @@ def main():
     store["source_status"] = {s["id"]: s for s in statuses}
 
     # 보관 기간 지난 기사 정리
-    cutoff = now - timedelta(days=RETENTION_DAYS)
-    store["articles"] = {k: a for k, a in store["articles"].items() if a["date"] >= cutoff}
+    def keep(a):
+        src = source_map.get(a["source"])
+        if not src:
+            return False
+        return a["date"] >= now - timedelta(days=src.get("retention", RETENTION_DAYS))
+    store["articles"] = {k: a for k, a in store["articles"].items() if keep(a)}
     articles = list(store["articles"].values())
+    trend_articles = [a for a in articles if source_map[a["source"]]["section"] in TREND_SECTIONS]
     print(f"[2/5] 신규 {new_count}건 / 누적 {len(articles)}건 (최근 {RETENTION_DAYS}일)")
 
     print("[3/5] 분류·중복 통합")
@@ -648,9 +655,9 @@ def main():
 
     print("[5/5] 트렌드 분석·리포트")
     reports = {
-        "daily": build_report(articles, now, 1, "24시간", tag_label, source_map),
-        "weekly": build_report(articles, now, 7, "7일", tag_label, source_map),
-        "monthly": build_report(articles, now, 30, "30일", tag_label, source_map),
+        "daily": build_report(trend_articles, now, 1, "24시간", tag_label, source_map),
+        "weekly": build_report(trend_articles, now, 7, "7일", tag_label, source_map),
+        "monthly": build_report(trend_articles, now, 30, "30일", tag_label, source_map),
     }
     if use_ai:
         for key, rep in reports.items():
@@ -671,11 +678,11 @@ def main():
         "sources": [{**{k: s[k] for k in ("id", "name", "section", "region", "lang", "site")},
                      "feed": s.get("feed"), "note": s.get("note"),
                      "status": store["source_status"].get(s["id"])} for s in SOURCES],
-        "trends": {"day": ranking(articles, now, 1, tag_label), "week": ranking(articles, now, 7, tag_label),
+        "trends": {"day": ranking(trend_articles, now, 1, tag_label), "week": ranking(trend_articles, now, 7, tag_label),
                    "comparable_week": comparable(now, 7)},
-        "topics": topic_share(articles, now, 7, tag_label),
-        "brands": brand_movers(articles, now, tag_label),
-        "regions": region_compare(articles, now, tag_label, source_map),
+        "topics": topic_share(trend_articles, now, 7, tag_label),
+        "brands": brand_movers(trend_articles, now, tag_label),
+        "regions": region_compare(trend_articles, now, tag_label, source_map),
         "reports": reports,
         "articles": [compact(a) for a in sorted(articles, key=lambda a: a["date"], reverse=True)],
     }

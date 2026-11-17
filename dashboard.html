@@ -259,6 +259,8 @@ const SECTIONS = [
   { id: "global_fashion", label: "해외 패션" },
   { id: "korea_fashion", label: "국내 패션" },
   { id: "lifestyle", label: "종합 트렌드" },
+  { id: "korea_culture", label: "국내 문화" },
+  { id: "korea_current", label: "국내 시사" },
 ];
 const VIEWS = [
   { id: "feed", label: "Feed" }, { id: "trends", label: "Trends" }, { id: "brands", label: "Brands" },
@@ -591,7 +593,7 @@ function renderSaved() {
 // 화면: 매체 현황
 // ─────────────────────────────────────────────
 function renderSources() {
-  const secLabel = { global_fashion: "해외 패션", korea_fashion: "국내 패션", lifestyle: "종합 트렌드" };
+  const secLabel = { global_fashion: "해외 패션", korea_fashion: "국내 패션", lifestyle: "종합 트렌드", korea_culture: "국내 문화", korea_current: "국내 시사" };
   const counts = {};
   D.articles.forEach(a => { counts[a.s] = (counts[a.s] || 0) + 1; });
   const live = D.sources.filter(s => s.status?.ok).length;
